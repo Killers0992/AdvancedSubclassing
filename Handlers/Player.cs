@@ -71,7 +71,8 @@ namespace Subclass.Handlers
 			Timing.CallDelayed(Subclass.Instance.CommonUtilsEnabled ? 2f : 0.1f, () =>
 			{
 				if (ev.Reason != SpawnReason.Escaped) TrackingAndMethods.RemoveAndAddRoles(ev.Player);
-			});
+			}); 
+			
 			object afkComp = ev.Player.GameObject.GetComponent("AFKComponent");
 			if (afkComp != null)
 			{
@@ -223,6 +224,9 @@ namespace Subclass.Handlers
 
 		public void OnDied(DiedEventArgs ev)
 		{
+			if (ev.Target == null)
+				return;
+
 			if (TrackingAndMethods.PlayersWithSubclasses.ContainsKey(ev.Target) && TrackingAndMethods.PlayersWithSubclasses[ev.Target].Abilities.Contains(AbilityType.ExplodeOnDeath))
 			{
 				Throwable throwable = null;
@@ -249,7 +253,6 @@ namespace Subclass.Handlers
 					TrackingAndMethods.DisplayCooldown(ev.Killer, AbilityType.Infect, killerSubclass, "infect", Time.time);
 					return;
 				}
-
 				if (!TrackingAndMethods.CanUseAbility(ev.Killer, AbilityType.Infect, killerSubclass))
 				{
 					TrackingAndMethods.DisplayCantUseAbility(ev.Killer, AbilityType.Infect, killerSubclass, "infect");
@@ -326,6 +329,9 @@ namespace Subclass.Handlers
 
 		public void OnHurting(HurtingEventArgs ev)
 		{
+			if (ev.Attacker == null)
+				return;
+
 			if (ev.Handler.Type == DamageType.Scp207 && TrackingAndMethods.PlayersBloodLusting.Contains(ev.Target))
 			{
 				ev.IsAllowed = false;
@@ -407,6 +413,7 @@ namespace Subclass.Handlers
 				{
 					ev.IsAllowed = false;
 				}
+
 				if (TrackingAndMethods.PlayersWithZombies.ContainsKey(ev.Target) && TrackingAndMethods.PlayersWithZombies[ev.Target].Contains(ev.Attacker))
 					ev.IsAllowed = false;
 
@@ -424,6 +431,7 @@ namespace Subclass.Handlers
 
 			if (targetClass != null && targetClass.Abilities.Contains(AbilityType.Regeneration))
 			{
+
 				if (ev.Target.ReferenceHub.playerEffectsController.AllEffects.ContainsKey(typeof(Regeneration)) && targetClass.FloatOptions.ContainsKey("RegenerationDisableDuration"))
 				{
 					((Regeneration)ev.Target.ReferenceHub.playerEffectsController.AllEffects[typeof(Regeneration)]).ActiveAt = Time.time + targetClass.FloatOptions["RegenerationDisableDuration"];
@@ -431,12 +439,12 @@ namespace Subclass.Handlers
 			}
 
 			if (ev.Handler.Type == DamageType.Falldown) return;
+
 			if (attackerClass != null && attackerClass.Abilities.Contains(AbilityType.LifeSteal))
 			{
 				ev.Attacker.Health += Mathf.Clamp(ev.Amount * ((attackerClass.FloatOptions.ContainsKey("LifeStealPercent") ?
 					attackerClass.FloatOptions["LifeStealPercent"] : 2f) / 100), 0, ev.Attacker.MaxHealth - ev.Attacker.Health);
 			}
-
 			if (attackerClass != null &&
 				attackerClass.FloatOptions.ContainsKey("OnHitDamageMultiplier"))
 			{

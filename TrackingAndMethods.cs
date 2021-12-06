@@ -464,16 +464,6 @@ namespace Subclass
                 }
 			};
 
-			if ((!lite || escaped))
-            {
-				foreach (var ammoType in subClass.SpawnAmmo)
-				{
-					if (ammoType.Value == -1)
-						continue;
-					player.Ammo[ammoType.Key] = (ushort)ammoType.Value;
-				}
-			}
-
 			if (subClass.Abilities.Contains(AbilityType.InfiniteAmmo))
 			{
 				player.Ammo[ItemType.Ammo12gauge] = ushort.MaxValue;
@@ -482,6 +472,16 @@ namespace Subclass
 				player.Ammo[ItemType.Ammo762x39] = ushort.MaxValue;
 				player.Ammo[ItemType.Ammo9x19] = ushort.MaxValue;
 			}
+            else if (!lite || escaped)
+            {
+				foreach (var ammoType in subClass.SpawnAmmo)
+				{
+					if (ammoType.Value == -1)
+						continue;
+					player.Ammo[ammoType.Key] = (ushort)ammoType.Value;
+				}
+			}
+			player.Inventory.ServerSendAmmo();
 
 			if (subClass.Abilities.Contains(AbilityType.HealAura))
 			{
@@ -648,6 +648,7 @@ namespace Subclass
 		{
 			if (PlayersThatJustGotAClass.ContainsKey(p) && PlayersThatJustGotAClass[p] > Time.time) return;
 			if (RoundJustStarted()) return;
+
 			if (!disguised)
 			{
 				if (PlayersInvisibleByCommand.Contains(p)) PlayersInvisibleByCommand.Remove(p);
