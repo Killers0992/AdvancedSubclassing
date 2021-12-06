@@ -251,7 +251,15 @@ namespace Subclass.Managers
 						Dictionary<ItemType, int> ammo = new Dictionary<ItemType, int>();
 						foreach (var item in ammoTemp)
 						{
-							ammo.Add((ItemType)Enum.Parse(typeof(ItemType), (string)item.Key), int.Parse((string)item.Value));
+							if (Enum.TryParse<ItemType>((string)item.Key, true, out ItemType itm))
+							{
+								ammo.Add(itm, int.Parse((string)item.Value));
+							}
+                            else
+                            {
+								Log.Error($"Failed parsing ammo name \"{(string)item.Key}\", possible names: Ammo12gauge, Ammo44cal, Ammo762x39, Ammo556x45, Ammo9x19.");
+                            }
+
 						}
 
 
