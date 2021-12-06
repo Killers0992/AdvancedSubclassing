@@ -437,6 +437,8 @@ namespace Subclass
 
 			if (subClass.StringOptions.ContainsKey("Nickname")) player.DisplayNickname = subClass.StringOptions["Nickname"].Replace("{name}", player.Nickname);
 
+			if (subClass.StringOptions.ContainsKey("CustomInfo")) player.CustomInfo = subClass.StringOptions["CustomInfo"];
+
 			if (subClass.Abilities.Contains(AbilityType.GodMode)) player.IsGodModeEnabled = true;
 			if (subClass.Abilities.Contains(AbilityType.InvisibleUntilInteract)) player.ReferenceHub.playerEffectsController.EnableEffect<Invisible>();
 			if (subClass.Abilities.Contains(AbilityType.InfiniteSprint)) player.GameObject.AddComponent<MonoBehaviours.InfiniteSprint>();
@@ -712,6 +714,8 @@ namespace Subclass
 						p.ReferenceHub.serverRoles.HiddenBadge = PreviousBadges.ContainsKey(p) ? System.Text.RegularExpressions.Regex.Split(PreviousBadges[p], System.Text.RegularExpressions.Regex.Escape(" [-/-] "))[0] : null;
 					}
 				}
+
+				if (subClass.StringOptions.ContainsKey("CustomInfo")) p.CustomInfo = string.Empty;
 
 				if (subClass.StringOptions.ContainsKey("Nickname")) p.DisplayNickname = null;
 
