@@ -251,7 +251,7 @@ namespace Subclass.Managers
 						Dictionary<ItemType, int> ammo = new Dictionary<ItemType, int>();
 						foreach (var item in ammoTemp)
 						{
-							ammo.Add((ItemType)Enum.Parse(typeof(ItemType), (string)item.Key), ushort.Parse((string)item.Value));
+							ammo.Add((ItemType)Enum.Parse(typeof(ItemType), (string)item.Key), int.Parse((string)item.Value));
 						}
 
 
