@@ -285,9 +285,13 @@ namespace Subclass
 
 				subClass = new SubClass(copy.Name + "-SCP-035 (p)", copy.AffectsRoles, copy.StringOptions, copy.BoolOptions, copy.IntOptions,
 					copy.FloatOptions, copy.SpawnLocations, copy.SpawnItems,
-					new Dictionary<ItemType, ushort>()
+					new Dictionary<ItemType, int>()
 					{
-						{ ItemType.Ammo12gauge, 0 }
+						{ ItemType.Ammo12gauge, -1 },
+						{ ItemType.Ammo44cal, -1 },
+						{ ItemType.Ammo556x45, -1 },
+						{ ItemType.Ammo762x39, -1 },
+						{ ItemType.Ammo9x19, -1 }
 					}, copy.Abilities, copy.AbilityCooldowns, copy.AdvancedFFRules, copy.OnHitEffects, copy.OnSpawnEffects,
 					copy.RolesThatCantDamage, "SCP", RoleType.None, null, subClass.OnDamagedEffects, null
 				);
@@ -460,29 +464,29 @@ namespace Subclass
                 }
 			};
 
-			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo12gauge] != 0)
+			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo12gauge] != -1)
 			{
-				player.Ammo[ItemType.Ammo12gauge] = subClass.SpawnAmmo[ItemType.Ammo12gauge];
+				player.Ammo[ItemType.Ammo12gauge] = (ushort)subClass.SpawnAmmo[ItemType.Ammo12gauge];
 			}
 
-			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo44cal] != 0)
+			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo44cal] != -1)
 			{
-				player.Ammo[ItemType.Ammo44cal] = subClass.SpawnAmmo[ItemType.Ammo44cal];
+				player.Ammo[ItemType.Ammo44cal] = (ushort)subClass.SpawnAmmo[ItemType.Ammo44cal];
 			}
 
-			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo556x45] != 0)
+			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo556x45] != -1)
 			{
-				player.Ammo[ItemType.Ammo556x45] = subClass.SpawnAmmo[ItemType.Ammo556x45];
+				player.Ammo[ItemType.Ammo556x45] = (ushort)subClass.SpawnAmmo[ItemType.Ammo556x45];
 			}
 
-			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo762x39] != 0)
+			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo762x39] != -1)
 			{
-				player.Ammo[ItemType.Ammo762x39] = subClass.SpawnAmmo[ItemType.Ammo762x39];
+				player.Ammo[ItemType.Ammo762x39] = (ushort)subClass.SpawnAmmo[ItemType.Ammo762x39];
 			}
 
-			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo9x19] != 0)
+			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo9x19] != -1)
 			{
-				player.Ammo[ItemType.Ammo9x19] = subClass.SpawnAmmo[ItemType.Ammo9x19];
+				player.Ammo[ItemType.Ammo9x19] = (ushort)subClass.SpawnAmmo[ItemType.Ammo9x19];
 			}
 
 			if (subClass.Abilities.Contains(AbilityType.InfiniteAmmo))

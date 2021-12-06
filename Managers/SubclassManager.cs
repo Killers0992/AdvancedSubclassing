@@ -248,7 +248,7 @@ namespace Subclass.Managers
 
 						Log.Debug($"Attempting to load spawn ammo for class: {(string)obj["name"]}", Subclass.Instance.Config.Debug);
 						Dictionary<object, object> ammoTemp = (Dictionary<object, object>)obj["spawn_ammo"];
-						Dictionary<ItemType, ushort> ammo = new Dictionary<ItemType, ushort>();
+						Dictionary<ItemType, int> ammo = new Dictionary<ItemType, int>();
 						foreach (var item in ammoTemp)
 						{
 							ammo.Add((ItemType)Enum.Parse(typeof(ItemType), (string)item.Key), ushort.Parse((string)item.Value));

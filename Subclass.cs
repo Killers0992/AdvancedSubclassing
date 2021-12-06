@@ -26,7 +26,7 @@ namespace Subclass
 		public override PluginPriority Priority { get; } = PluginPriority.Last;
 		public override string Name { get; } = "Subclass";
 		public override string Author { get; } = "Steven4547466";
-		public override Version Version { get; } = new Version(2, 0, 1);
+		public override Version Version { get; } = new Version(2, 0, 2);
 		public override Version RequiredExiledVersion { get; } = new Version(4,0,0);
 		public override string Prefix { get; } = "Subclass";
 
@@ -272,7 +272,7 @@ namespace Subclass
 
 		public Dictionary<int, Dictionary<string, float>> SpawnItems = new Dictionary<int, Dictionary<string, float>>();
 
-		public Dictionary<ItemType, ushort> SpawnAmmo = new Dictionary<ItemType, ushort>();
+		public Dictionary<ItemType, int> SpawnAmmo = new Dictionary<ItemType, int>();
 
 		public List<AbilityType> Abilities = new List<AbilityType>();
 
@@ -304,7 +304,7 @@ namespace Subclass
 
 		public SubClass(string name, List<RoleType> roles, Dictionary<string, string> strings, Dictionary<string, bool> bools,
 			Dictionary<string, int> ints, Dictionary<string, float> floats, List<string> spawns, Dictionary<int, Dictionary<string, float>> items,
-			Dictionary<ItemType, ushort> ammo, List<AbilityType> abilities, Dictionary<AbilityType, float> cooldowns,
+			Dictionary<ItemType, int> ammo, List<AbilityType> abilities, Dictionary<AbilityType, float> cooldowns,
 			List<string> ffRules = null, List<string> onHitEffects = null, List<string> spawnEffects = null, List<RoleType> cantDamage = null,
 			string endsRoundWith = "RIP", RoleType spawnsAs = RoleType.None, RoleType[] escapesAs = null, Dictionary<string, List<string>> onTakeDamage = null, 
 			List<RoleType> cantDamageRoles = null, List<Team> cantDamageTeams = null, List<Team> teamsThatCantDamage = null, List<string> cantDamageSubclasses = null,
@@ -352,7 +352,7 @@ namespace Subclass
 			FloatOptions = new Dictionary<string, float>(subClass.FloatOptions);
 			SpawnLocations = new List<string>(subClass.SpawnLocations);
 			SpawnItems = new Dictionary<int, Dictionary<string, float>>(subClass.SpawnItems);
-			SpawnAmmo = new Dictionary<ItemType, ushort>(subClass.SpawnAmmo);
+			SpawnAmmo = new Dictionary<ItemType, int>(subClass.SpawnAmmo);
 			Abilities = new List<AbilityType>(subClass.Abilities);
 			AbilityCooldowns = new Dictionary<AbilityType, float>(subClass.AbilityCooldowns);
 			AdvancedFFRules = new List<string>(subClass.AdvancedFFRules);
