@@ -464,29 +464,14 @@ namespace Subclass
                 }
 			};
 
-			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo12gauge] != -1)
-			{
-				player.Ammo[ItemType.Ammo12gauge] = (ushort)((12 * (ushort)subClass.SpawnAmmo[ItemType.Ammo12gauge]) / 16);
-			}
-
-			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo44cal] != -1)
-			{
-				player.Ammo[ItemType.Ammo44cal] = (ushort)((12 * (ushort)subClass.SpawnAmmo[ItemType.Ammo44cal]) / 16);
-			}
-
-			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo556x45] != -1)
-			{
-				player.Ammo[ItemType.Ammo556x45] = (ushort)((12 * (ushort)subClass.SpawnAmmo[ItemType.Ammo556x45]) / 16);
-			}
-
-			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo762x39] != -1)
-			{
-				player.Ammo[ItemType.Ammo762x39] = (ushort)((12 * (ushort)subClass.SpawnAmmo[ItemType.Ammo762x39]) / 16);
-			}
-
-			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo9x19] != -1)
-			{
-				player.Ammo[ItemType.Ammo9x19] = (ushort)((12 * (ushort)subClass.SpawnAmmo[ItemType.Ammo9x19]) / 16);
+			if ((!lite || escaped))
+            {
+				foreach (var ammoType in subClass.SpawnAmmo)
+				{
+					if (ammoType.Value == -1)
+						continue;
+					player.Ammo[ammoType.Key] = (ushort)ammoType.Value;
+				}
 			}
 
 			if (subClass.Abilities.Contains(AbilityType.InfiniteAmmo))
