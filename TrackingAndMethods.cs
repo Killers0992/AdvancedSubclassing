@@ -466,27 +466,27 @@ namespace Subclass
 
 			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo12gauge] != -1)
 			{
-				player.Ammo[ItemType.Ammo12gauge] = (ushort)subClass.SpawnAmmo[ItemType.Ammo12gauge];
+				player.Ammo[ItemType.Ammo12gauge] = (ushort)((12 * (ushort)subClass.SpawnAmmo[ItemType.Ammo12gauge]) / 16);
 			}
 
 			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo44cal] != -1)
 			{
-				player.Ammo[ItemType.Ammo44cal] = (ushort)subClass.SpawnAmmo[ItemType.Ammo44cal];
+				player.Ammo[ItemType.Ammo44cal] = (ushort)((12 * (ushort)subClass.SpawnAmmo[ItemType.Ammo44cal]) / 16);
 			}
 
 			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo556x45] != -1)
 			{
-				player.Ammo[ItemType.Ammo556x45] = (ushort)subClass.SpawnAmmo[ItemType.Ammo556x45];
+				player.Ammo[ItemType.Ammo556x45] = (ushort)((12 * (ushort)subClass.SpawnAmmo[ItemType.Ammo556x45]) / 16);
 			}
 
 			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo762x39] != -1)
 			{
-				player.Ammo[ItemType.Ammo762x39] = (ushort)subClass.SpawnAmmo[ItemType.Ammo762x39];
+				player.Ammo[ItemType.Ammo762x39] = (ushort)((12 * (ushort)subClass.SpawnAmmo[ItemType.Ammo762x39]) / 16);
 			}
 
 			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo9x19] != -1)
 			{
-				player.Ammo[ItemType.Ammo9x19] = (ushort)subClass.SpawnAmmo[ItemType.Ammo9x19];
+				player.Ammo[ItemType.Ammo9x19] = (ushort)((12 * (ushort)subClass.SpawnAmmo[ItemType.Ammo9x19]) / 16);
 			}
 
 			if (subClass.Abilities.Contains(AbilityType.InfiniteAmmo))
