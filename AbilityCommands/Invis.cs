@@ -30,7 +30,7 @@ namespace Subclass.AbilityCommands
 				response = "";
 				return true;
 			}
-			Scp268 scp268 = player.ReferenceHub.playerEffectsController.GetEffect<Scp268>();
+			Invisible scp268 = player.ReferenceHub.playerEffectsController.GetEffect<Invisible>();
 			if (scp268 != null)
 			{
 				SubClass subClass = TrackingAndMethods.PlayersWithSubclasses[player];
@@ -41,7 +41,7 @@ namespace Subclass.AbilityCommands
 					return true;
 				}
 
-				if (scp268.Enabled)
+				if (scp268.IsEnabled)
 				{
 					Log.Debug($"Player {player.Nickname} failed to go invisible on command", Subclass.Instance.Config.Debug);
 					player.Broadcast(3, Subclass.Instance.Config.AlreadyInvisibleMessage);
@@ -62,13 +62,13 @@ namespace Subclass.AbilityCommands
 
 				//player.ReferenceHub.playerEffectsController.EnableEffect(scp268);
 
-				player.ReferenceHub.playerEffectsController.EnableEffect<Scp268>();
+				player.ReferenceHub.playerEffectsController.EnableEffect<Invisible>();
 				TrackingAndMethods.PlayersInvisibleByCommand.Add(player);
 				Timing.CallDelayed(subClass.FloatOptions.ContainsKey("InvisibleOnCommandDuration") ?
 					subClass.FloatOptions["InvisibleOnCommandDuration"] : 30f, () =>
 					{
 						if (TrackingAndMethods.PlayersInvisibleByCommand.Contains(player)) TrackingAndMethods.PlayersInvisibleByCommand.Remove(player);
-						if (scp268.Enabled) player.ReferenceHub.playerEffectsController.DisableEffect<Scp268>();
+						if (scp268.IsEnabled) player.ReferenceHub.playerEffectsController.DisableEffect<Invisible>();
 					});
 
 				TrackingAndMethods.AddCooldown(player, AbilityType.InvisibleOnCommand);

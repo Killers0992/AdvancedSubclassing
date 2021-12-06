@@ -10,6 +10,7 @@ using UnityEngine;
 using CustomPlayerEffects;
 using Mirror;
 using MEC;
+using PlayerStatsSystem;
 
 namespace Subclass.AbilityCommands
 {
@@ -54,22 +55,24 @@ namespace Subclass.AbilityCommands
 				return false;
 
 			player.EnableEffect<Ensnared>(subClass.FloatOptions.ContainsKey("FakeDuration") ? subClass.FloatOptions["FakeDuration"] : 3);
-			player.EnableEffect<Scp268>(subClass.FloatOptions.ContainsKey("FakeDuration") ? subClass.FloatOptions["FakeDuration"] : 3);
+			player.EnableEffect<Invisible>(subClass.FloatOptions.ContainsKey("FakeDuration") ? subClass.FloatOptions["FakeDuration"] : 3);
 
-			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(role.model_ragdoll, player.Position + role.ragdoll_offset.position, Quaternion.Euler(player.GameObject.transform.rotation.eulerAngles + role.ragdoll_offset.rotation));
-			NetworkServer.Spawn(gameObject);
-			Ragdoll component = gameObject.GetComponent<Ragdoll>();
-			component.Networkowner = new Ragdoll.Info(player.UserId, player.Nickname, new PlayerStats.HitInfo(0, player.Nickname, DamageTypes.Falldown, player.Id),
-				role, player.Id);
-			component.NetworkallowRecall = false;
-			component.NetworkPlayerVelo = (player.ReferenceHub.playerMovementSync == null) ? Vector3.zero : player.ReferenceHub.playerMovementSync.PlayerVelocity;
+			GameObject model_ragdoll = player.ReferenceHub.characterClassManager.CurRole.model_ragdoll;
+			GameObject ragdoll = null;
+			if (!(model_ragdoll == null) && UnityEngine.Object.Instantiate(model_ragdoll).TryGetComponent(out Ragdoll component))
+			{
+				component.NetworkInfo = new RagdollInfo(player.ReferenceHub, new UniversalDamageHandler(0f, DeathTranslations.Falldown), model_ragdoll.transform.localPosition, model_ragdoll.transform.localRotation);
+				NetworkServer.Spawn(component.gameObject);
+				ragdoll = component.gameObject;
+			}
+
 
 			TrackingAndMethods.UseAbility(player, AbilityType.Fake, subClass);
 			TrackingAndMethods.AddCooldown(player, AbilityType.Fake);
 
 			Timing.CallDelayed(subClass.FloatOptions.ContainsKey("FakeDuration") ? subClass.FloatOptions["FakeDuration"] : 3, () =>
 			{
-				UnityEngine.Object.DestroyImmediate(gameObject);
+				UnityEngine.Object.DestroyImmediate(ragdoll);
 			});
 
 			return true;

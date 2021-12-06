@@ -1,7 +1,8 @@
 ﻿using Exiled.API.Features;
-using Grenades;
+using Exiled.API.Features.Items;
 using MEC;
 using Mirror;
+using PlayerStatsSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,21 +40,21 @@ namespace Subclass.AbilityCommands
 			}
 
 			Ragdoll doll = colliders[0].gameObject.GetComponentInParent<Ragdoll>();
-			if (doll.owner == null)
+			if (doll.NetworkInfo.OwnerHub == null)
 			{
 				Log.Debug($"Player {player.Nickname} {(necro ? "necromancy" : "revive")} failed", Subclass.Instance.Config.Debug);
 				player.Broadcast(2, Subclass.Instance.Config.CantReviveMessage);
 				return;
 			}
 
-			if (doll.owner.DeathCause.GetDamageType() == DamageTypes.Lure)
+			if ((doll.NetworkInfo.Handler as UniversalDamageHandler).TranslationId == DeathTranslations.PocketDecay.Id)
 			{
 				Log.Debug($"Player {player.Nickname} {(necro ? "necromancy" : "revive")} failed", Subclass.Instance.Config.Debug);
 				player.Broadcast(2, Subclass.Instance.Config.CantReviveMessage);
 				return;
 			}
 
-			Player owner = Player.Get(doll.owner.PlayerId);
+			Player owner = Player.Get(doll.NetworkInfo.OwnerHub);
 			if (owner != null && !owner.IsAlive)
 			{
 				bool revived = false;
@@ -63,12 +64,12 @@ namespace Subclass.AbilityCommands
 					if (TrackingAndMethods.PlayersThatJustGotAClass.ContainsKey(owner)) TrackingAndMethods.PlayersThatJustGotAClass[owner] = Time.time + 3f;
 					else TrackingAndMethods.PlayersThatJustGotAClass.Add(owner, Time.time + 3f);
 
-					owner.SetRole((RoleType)TrackingAndMethods.GetPreviousRole(owner), true);
+					owner.SetRole((RoleType)TrackingAndMethods.GetPreviousRole(owner), Exiled.API.Enums.SpawnReason.ForceClass, true);
 
 					if (TrackingAndMethods.PreviousSubclasses.ContainsKey(owner) && TrackingAndMethods.PreviousSubclasses[owner].AffectsRoles.Contains((RoleType)TrackingAndMethods.GetPreviousRole(owner)))
 						TrackingAndMethods.AddClass(owner, TrackingAndMethods.PreviousSubclasses[owner], false, true);
 
-					owner.Inventory.Clear();
+					owner.ClearInventory(true);
 					revived = true;
 				}
 				else if (necro)
@@ -113,15 +114,27 @@ namespace Subclass.AbilityCommands
 
 		public static void SpawnGrenade(ItemType type, Player player, SubClass subClass)
 		{
-			// Credit to KoukoCocoa's AdminTools for the grenade spawn script below, I was lost. https://github.com/KoukoCocoa/AdminTools/
-			GrenadeManager grenadeManager = player.ReferenceHub.gameObject.GetComponent<GrenadeManager>();
-			GrenadeSettings settings = grenadeManager.availableGrenades.FirstOrDefault(g => g.inventoryID == type);
-			Grenades.Grenade grenade = UnityEngine.Object.Instantiate(settings.grenadeInstance).GetComponent<Grenades.Grenade>();
-			if (type == ItemType.GrenadeFlash) grenade.fuseDuration = subClass.FloatOptions.ContainsKey("FlashOnCommandFuseTimer") ? subClass.FloatOptions["FlashOnCommandFuseTimer"] : 0.3f;
-			else grenade.fuseDuration = subClass.FloatOptions.ContainsKey("GrenadeOnCommandFuseTimer") ? subClass.FloatOptions["GrenadeOnCommandFuseTimer"] : 0.3f;
-			grenade.FullInitData(grenadeManager, player.Position, Quaternion.Euler(grenade.throwStartAngle),
-				grenade.throwLinearVelocityOffset, grenade.throwAngularVelocity, player.Team);
-			NetworkServer.Spawn(grenade.gameObject);
+			Throwable throwable = null;
+            switch (type)
+            {
+				case ItemType.GrenadeFlash:
+					var flash = new FlashGrenade(ItemType.GrenadeFlash);
+					if (subClass.FloatOptions.ContainsKey("FlashOnCommandFuseTimer"))
+						flash.FuseTime = subClass.FloatOptions["FlashOnCommandFuseTimer"];
+					throwable = flash;
+					break;
+				case ItemType.GrenadeHE:
+					var gren = new ExplosiveGrenade(ItemType.GrenadeHE);
+					if (subClass.FloatOptions.ContainsKey("GrenadeOnCommandFuseTimer"))
+						gren.FuseTime = subClass.FloatOptions["GrenadeOnCommandFuseTimer"];
+					throwable = gren;
+					break;
+				case ItemType.SCP018:
+					throwable = new ExplosiveGrenade(ItemType.SCP018);
+					break;
+            }
+			
+			player.ThrowItem(throwable, false);
 		}
 	}
 }

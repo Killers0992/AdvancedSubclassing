@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using CustomPlayerEffects;
 using Exiled.API.Features;
 using Mirror;
+using PlayerStatsSystem;
 using UnityEngine;
 
 
@@ -38,13 +39,13 @@ namespace Subclass.Effects
 			AffectEnemies = affectEnemies;
 		}
 
-		public override void PublicUpdate()
-		{
+        public override void OnUpdate()
+        {
 			if (!NetworkServer.active)
 			{
 				return;
 			}
-			if (Enabled)
+			if (IsEnabled)
 			{
 				TimeLeft -= Time.deltaTime;
 				if (TimeLeft <= 0f)
@@ -55,7 +56,7 @@ namespace Subclass.Effects
 					{
 						if ((!AffectEnemies && p.Team != player.Team) || (p.Id != player.Id && !AffectAllies && p.Team == player.Team)) continue;
 						if (p.Id == player.Id && !AffectSelf) continue;
-						p.ReferenceHub.playerStats.HurtPlayer(new PlayerStats.HitInfo(HealthPerTick, player.Nickname, DamageTypes.Poison, player.Id), p.GameObject);
+						p.Hurt(new UniversalDamageHandler(HealthPerTick, DeathTranslations.Poisoned));
 					}
 				}
 			}
@@ -64,5 +65,6 @@ namespace Subclass.Effects
 				TimeLeft = TimeBetweenTicks;
 			}
 		}
+
 	}
 }

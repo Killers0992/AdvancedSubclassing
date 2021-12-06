@@ -17,6 +17,8 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using Subclass.Events;
+using PlayerStatsSystem;
+using InventorySystem.Items.Usables;
 
 namespace Subclass
 {
@@ -283,11 +285,9 @@ namespace Subclass
 
 				subClass = new SubClass(copy.Name + "-SCP-035 (p)", copy.AffectsRoles, copy.StringOptions, copy.BoolOptions, copy.IntOptions,
 					copy.FloatOptions, copy.SpawnLocations, copy.SpawnItems,
-					new Dictionary<AmmoType, int>()
+					new Dictionary<ItemType, ushort>()
 					{
-						{ AmmoType.Nato556, -1 },
-						{ AmmoType.Nato762, -1 },
-						{ AmmoType.Nato9, -1 }
+						{ ItemType.Ammo12gauge, 0 }
 					}, copy.Abilities, copy.AbilityCooldowns, copy.AdvancedFFRules, copy.OnHitEffects, copy.OnSpawnEffects,
 					copy.RolesThatCantDamage, "SCP", RoleType.None, null, subClass.OnDamagedEffects, null
 				);
@@ -356,12 +356,12 @@ namespace Subclass
 
 				if ((!lite || escaped) && subClass.SpawnsAs != RoleType.None)
 				{
-					player.SetRole(subClass.SpawnsAs, true);
+					player.SetRole(subClass.SpawnsAs, SpawnReason.ForceClass, true);
 				}
 
 				if ((!lite || escaped) && subClass.SpawnItems.Count != 0)
 				{
-					player.Inventory.items.Clear();
+					player.ClearInventory(true);
 					foreach (var item in subClass.SpawnItems)
 					{
 						foreach (var item2 in item.Value)
@@ -375,7 +375,7 @@ namespace Subclass
 								}
 								else
 								{
-									Inventory.SyncItemInfo syncItem = new Inventory.SyncItemInfo { id = ItemType.None };
+									/*Inventory.SyncItemInfo syncItem = new Inventory.SyncItemInfo { id = ItemType.None };
 									int counter = 0;
 									foreach (var methods in CustomWeaponGetters)
 									{
@@ -401,7 +401,7 @@ namespace Subclass
 									{
 										player.AddItem(syncItem);
 										CustomWeaponGetters[counter].Item2.Invoke(null, new object[] { player, item2.Key, player.Inventory.items.Last() });
-									}
+									}	*/
 								}
 								break;
 							}
@@ -411,8 +411,8 @@ namespace Subclass
 
 				if (subClass.IntOptions["MaxHealth"] != -1) player.MaxHealth = subClass.IntOptions["MaxHealth"];
 				if ((!lite || escaped) && subClass.IntOptions["HealthOnSpawn"] != -1) player.Health = subClass.IntOptions["HealthOnSpawn"];
-				if (subClass.IntOptions["MaxArmor"] != -1) player.MaxAdrenalineHealth = subClass.IntOptions["MaxArmor"];
-				if ((!lite || escaped) && subClass.IntOptions["ArmorOnSpawn"] != -1) player.AdrenalineHealth = subClass.IntOptions["ArmorOnSpawn"];
+				if (subClass.IntOptions["MaxArmor"] != -1) player.MaxArtificialHealth = subClass.IntOptions["MaxArmor"];
+				if ((!lite || escaped) && subClass.IntOptions["ArmorOnSpawn"] != -1) player.ArtificialHealth = subClass.IntOptions["ArmorOnSpawn"];
 
 				Timing.CallDelayed(0.3f, () =>
 				{
@@ -438,7 +438,7 @@ namespace Subclass
 			if (subClass.StringOptions.ContainsKey("Nickname")) player.DisplayNickname = subClass.StringOptions["Nickname"].Replace("{name}", player.Nickname);
 
 			if (subClass.Abilities.Contains(AbilityType.GodMode)) player.IsGodModeEnabled = true;
-			if (subClass.Abilities.Contains(AbilityType.InvisibleUntilInteract)) player.ReferenceHub.playerEffectsController.EnableEffect<Scp268>();
+			if (subClass.Abilities.Contains(AbilityType.InvisibleUntilInteract)) player.ReferenceHub.playerEffectsController.EnableEffect<Invisible>();
 			if (subClass.Abilities.Contains(AbilityType.InfiniteSprint)) player.GameObject.AddComponent<MonoBehaviours.InfiniteSprint>();
 			if (subClass.Abilities.Contains(AbilityType.Disable173Stop)) Scp173.TurnedPlayers.Add(player);
 			if (subClass.Abilities.Contains(AbilityType.Scp939Vision))
@@ -450,28 +450,46 @@ namespace Subclass
 					player.ReferenceHub.playerEffectsController.EnableEffect(visuals);
 				});
 			}
-			if (subClass.Abilities.Contains(AbilityType.NoArmorDecay)) player.ReferenceHub.playerStats.artificialHpDecay = 0f;
+			if (subClass.Abilities.Contains(AbilityType.NoArmorDecay))
+            {
+				foreach(var proc in (player.ReferenceHub.playerStats.StatModules[1] as AhpStat)._activeProcesses)
+                {
+					proc.DecayRate = 0f;
+                }
+			};
 
-			if ((!lite || escaped) && subClass.SpawnAmmo[AmmoType.Nato556] != -1)
+			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo12gauge] != 0)
 			{
-				player.Ammo[(int)AmmoType.Nato556] = (uint)subClass.SpawnAmmo[AmmoType.Nato556];
+				player.Ammo[ItemType.Ammo12gauge] = subClass.SpawnAmmo[ItemType.Ammo12gauge];
 			}
 
-			if ((!lite || escaped) && subClass.SpawnAmmo[AmmoType.Nato762] != -1)
+			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo44cal] != 0)
 			{
-				player.Ammo[(int)AmmoType.Nato762] = (uint)subClass.SpawnAmmo[AmmoType.Nato762];
+				player.Ammo[ItemType.Ammo44cal] = subClass.SpawnAmmo[ItemType.Ammo44cal];
 			}
 
-			if ((!lite || escaped) && subClass.SpawnAmmo[AmmoType.Nato9] != -1)
+			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo556x45] != 0)
 			{
-				player.Ammo[(int)AmmoType.Nato9] = (uint)subClass.SpawnAmmo[AmmoType.Nato9];
+				player.Ammo[ItemType.Ammo556x45] = subClass.SpawnAmmo[ItemType.Ammo556x45];
+			}
+
+			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo762x39] != 0)
+			{
+				player.Ammo[ItemType.Ammo762x39] = subClass.SpawnAmmo[ItemType.Ammo762x39];
+			}
+
+			if ((!lite || escaped) && subClass.SpawnAmmo[ItemType.Ammo9x19] != 0)
+			{
+				player.Ammo[ItemType.Ammo9x19] = subClass.SpawnAmmo[ItemType.Ammo9x19];
 			}
 
 			if (subClass.Abilities.Contains(AbilityType.InfiniteAmmo))
 			{
-				player.Ammo[0] = uint.MaxValue;
-				player.Ammo[1] = uint.MaxValue;
-				player.Ammo[2] = uint.MaxValue;
+				player.Ammo[ItemType.Ammo12gauge] = ushort.MaxValue;
+				player.Ammo[ItemType.Ammo44cal] = ushort.MaxValue;
+				player.Ammo[ItemType.Ammo556x45] = ushort.MaxValue;
+				player.Ammo[ItemType.Ammo762x39] = ushort.MaxValue;
+				player.Ammo[ItemType.Ammo9x19] = ushort.MaxValue;
 			}
 
 			if (subClass.Abilities.Contains(AbilityType.HealAura))
@@ -647,7 +665,12 @@ namespace Subclass
 				if (PlayersWithSubclasses.ContainsKey(p) && PlayersWithSubclasses[p].Abilities.Contains(AbilityType.Disable173Stop)
 					&& Scp173.TurnedPlayers.Contains(p)) Scp173.TurnedPlayers.Remove(p);
 				if (PlayersWithSubclasses.ContainsKey(p) && PlayersWithSubclasses[p].Abilities.Contains(AbilityType.NoArmorDecay))
-					p.ReferenceHub.playerStats.artificialHpDecay = 0.75f;
+                {
+					foreach (var proc in (p.ReferenceHub.playerStats.StatModules[1] as AhpStat)._activeProcesses)
+					{
+						proc.DecayRate = 1.2f;
+					}
+				}
 				if (PlayersInvisibleByCommand.Contains(p)) PlayersInvisibleByCommand.Remove(p);
 				if (PlayersVenting.Contains(p)) PlayersVenting.Remove(p);
 				if (PlayersBloodLusting.Contains(p)) PlayersBloodLusting.Remove(p);
@@ -992,7 +1015,7 @@ namespace Subclass
 				List<Player> zombies = API.RevivedZombies();
 				if (Player.List.Where(p => p.Team == Team.SCP).All(p => zombies.Contains(p)))
 				{
-					foreach (Player zombie in zombies) zombie.Kill();
+					foreach (Player zombie in zombies) zombie.Kill("Force");
 				}
 			}
 
@@ -1011,14 +1034,14 @@ namespace Subclass
 						leadingTeam = RoundSummary.LeadingTeam.Anomalies;
 						break;
 				}
-				RoundSummary.singleton._roundEnded = true;
-				RoundSummary.singleton.RpcShowRoundSummary(RoundSummary.singleton.classlistStart, classList, leadingTeam, RoundSummary.escaped_ds, RoundSummary.escaped_scientists, RoundSummary.kills_by_scp, Mathf.Clamp(GameCore.ConfigFile.ServerConfig.GetInt("auto_round_restart_time", 10), 5, 1000));
+				RoundSummary.singleton.RoundEnded = true;
+				RoundSummary.singleton.RpcShowRoundSummary(RoundSummary.singleton.classlistStart, classList, leadingTeam, RoundSummary.EscapedClassD, RoundSummary.EscapedScientists, RoundSummary.KilledBySCPs, Mathf.Clamp(GameCore.ConfigFile.ServerConfig.GetInt("auto_round_restart_time", 10), 5, 1000));
 				for (int i = 0; i < 50 * (Mathf.Clamp(GameCore.ConfigFile.ServerConfig.GetInt("auto_round_restart_time", 10), 5, 1000) - 1); i++)
 					yield return 0.0f;
 				RoundSummary.singleton.RpcDimScreen();
 				for (int i = 0; i < 50; i++)
 					yield return 0.0f;
-				PlayerManager.localPlayer.GetComponent<PlayerStats>().Roundrestart();
+				RoundRestarting.RoundRestart.InitiateRoundRestart();
 				yield break;
 			}
 
@@ -1039,14 +1062,14 @@ namespace Subclass
 							break;
 					}
 				}
-				RoundSummary.singleton._roundEnded = true;
-				RoundSummary.singleton.RpcShowRoundSummary(RoundSummary.singleton.classlistStart, classList, leadingTeam, RoundSummary.escaped_ds, RoundSummary.escaped_scientists, RoundSummary.kills_by_scp, Mathf.Clamp(GameCore.ConfigFile.ServerConfig.GetInt("auto_round_restart_time", 10), 5, 1000));
+				RoundSummary.singleton.RoundEnded = true;
+				RoundSummary.singleton.RpcShowRoundSummary(RoundSummary.singleton.classlistStart, classList, leadingTeam, RoundSummary.EscapedClassD, RoundSummary.EscapedScientists, RoundSummary.KilledBySCPs, Mathf.Clamp(GameCore.ConfigFile.ServerConfig.GetInt("auto_round_restart_time", 10), 5, 1000));
 				for (int i = 0; i < 50 * (Mathf.Clamp(GameCore.ConfigFile.ServerConfig.GetInt("auto_round_restart_time", 10), 5, 1000) - 1); i++)
 					yield return 0.0f;
 				RoundSummary.singleton.RpcDimScreen();
 				for (int i = 0; i < 50; i++)
 					yield return 0.0f;
-				PlayerManager.localPlayer.GetComponent<PlayerStats>().Roundrestart();
+				RoundRestarting.RoundRestart.InitiateRoundRestart();
 				yield break;
 			}
 
@@ -1063,9 +1086,9 @@ namespace Subclass
 						teamsAlive.Count(e => e == PlayersWithSubclasses[player].EndsRoundWith) == 1)
 					{
 						PlayersThatJustGotAClass[player] = Time.time + 3f;
-						if (PlayersWithSubclasses[player].EndsRoundWith == "MTF") player.SetRole(RoleType.NtfScientist, true);
-						else if (PlayersWithSubclasses[player].EndsRoundWith == "CHI") player.SetRole(RoleType.ChaosInsurgency, true);
-						else player.SetRole(RoleType.Scp0492, true);
+						if (PlayersWithSubclasses[player].EndsRoundWith == "MTF") player.SetRole(RoleType.NtfSpecialist, SpawnReason.ForceClass, true);
+						else if (PlayersWithSubclasses[player].EndsRoundWith == "CHI") player.SetRole(RoleType.ChaosConscript, SpawnReason.ForceClass, true);
+						else player.SetRole(RoleType.Scp0492, SpawnReason.ForceClass, true);
 					}
 				}
 			}
@@ -1334,7 +1357,7 @@ namespace Subclass
 			Coroutines.Add(Timing.CallDelayed(subClass.AbilityCooldowns[AbilityType.Multiply], () =>
 			{
 				if (player.Role == RoleType.Spectator || !PlayersWithSubclasses.ContainsKey(player) || PlayersWithSubclasses[player].Name != subClass.Name
-					|| savedRole != player.Role || (Map.IsLCZDecontaminated && savedRole.GetSpawnZone() == ZoneType.LightContainment) 
+					|| savedRole != player.Role || (Map.IsLczDecontaminated && savedRole.GetSpawnZone() == ZoneType.LightContainment) 
 					|| (Warhead.IsDetonated && savedRole.GetSpawnZone() != ZoneType.Surface) || savedRole.GetSpawnZone() == ZoneType.Unspecified)
 				{
 					Timing.KillCoroutines(Coroutines[coroutineIndex]);
@@ -1391,11 +1414,14 @@ namespace Subclass
 				case RoleType.Scp93989:
 					return ZoneType.HeavyContainment;
 
-				case RoleType.ChaosInsurgency:
-				case RoleType.NtfCadet:
-				case RoleType.NtfCommander:
-				case RoleType.NtfLieutenant:
-				case RoleType.NtfScientist:
+				case RoleType.ChaosMarauder:
+				case RoleType.ChaosRepressor:
+				case RoleType.ChaosRifleman:
+				case RoleType.ChaosConscript:
+				case RoleType.NtfPrivate:
+				case RoleType.NtfCaptain:
+				case RoleType.NtfSergeant:
+				case RoleType.NtfSpecialist:
 				case RoleType.Tutorial:
 					return ZoneType.Surface;
 

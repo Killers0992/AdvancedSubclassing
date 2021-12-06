@@ -76,11 +76,11 @@ namespace Subclass.AbilityCommands
 					break;
 
 				case Team.CHI:
-					role = RoleType.ChaosInsurgency;
+					role = RoleType.ChaosRifleman;
 					break;
 
 				case Team.MTF:
-					role = RoleType.NtfCadet;
+					role = RoleType.NtfPrivate;
 					break;
 
 				case Team.RSC:
@@ -102,21 +102,21 @@ namespace Subclass.AbilityCommands
 			TrackingAndMethods.RemoveAndAddRoles(player, true, false, false, true);
 
 			float health = player.Health;
-			float armor = player.AdrenalineHealth;
+			float armor = player.ArtificialHealth;
 			int maxHealth = player.MaxHealth;
-			int maxArmor = player.MaxAdrenalineHealth;
+			float maxArmor = player.MaxArtificialHealth;
 
 			RoleType trueRole = player.Role;
 
 			SubClass cloneClass = new SubClass(subClass);
 			cloneClass.BoolOptions["TakesFriendlyFire"] = true;
 
-			player.SetRole(role, true);
+			player.SetRole(role, Exiled.API.Enums.SpawnReason.ForceClass, true);
 
 			Timing.CallDelayed(0.1f, () =>
 			{
 				player.Health = health;
-				player.AdrenalineHealth = armor;
+				player.ArtificialHealth = armor;
 				player.IsFriendlyFireEnabled = true;
 				Player scp035 = null;
 				if (Subclass.Instance.Scp035Enabled)
@@ -136,9 +136,9 @@ namespace Subclass.AbilityCommands
 				TrackingAndMethods.RemoveAndAddRoles(player, true, false, false, true);
 
 				float curHealth = player.Health;
-				float curArmor = player.AdrenalineHealth;
+				float curArmor = player.ArtificialHealth;
 
-				player.SetRole(trueRole, true);
+				player.SetRole(trueRole, Exiled.API.Enums.SpawnReason.ForceClass, true);
 
 				Timing.CallDelayed(Subclass.Instance.CommonUtilsEnabled ? 2f : 0.1f, () =>
 				{
@@ -150,9 +150,9 @@ namespace Subclass.AbilityCommands
 					TrackingAndMethods.AddClass(player, subClass, scp035?.Id == player.Id, true, false, true);
 
 					player.MaxHealth = maxHealth;
-					player.MaxAdrenalineHealth = maxArmor;
+					player.MaxArtificialHealth = maxArmor;
 					player.Health = curHealth;
-					player.AdrenalineHealth = curArmor;
+					player.ArtificialHealth = curArmor;
 					player.IsFriendlyFireEnabled = !subClass.BoolOptions["DisregardHasFF"] && subClass.BoolOptions["HasFriendlyFire"];
 				});
 

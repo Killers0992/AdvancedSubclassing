@@ -51,7 +51,7 @@ namespace Subclass.AbilityCommands
 			Scp207 scp207 = player.ReferenceHub.playerEffectsController.GetEffect<Scp207>();
 
 			byte prevIntensity = scp207.Intensity;
-			scp207.ServerChangeIntensity((byte)subClass.IntOptions["BloodlustIntensity"]);
+			scp207.Intensity = (byte)subClass.IntOptions["BloodlustIntensity"];
 			scp207.ServerChangeDuration(subClass.FloatOptions["BloodlustDuration"], false);
 
 			TrackingAndMethods.PlayersBloodLusting.Add(player);
@@ -61,7 +61,7 @@ namespace Subclass.AbilityCommands
 			Timing.CallDelayed(subClass.FloatOptions["BloodlustDuration"], () =>
 			{
 				if (TrackingAndMethods.PlayersBloodLusting.Contains(player)) TrackingAndMethods.PlayersBloodLusting.Remove(player);
-				scp207.ServerChangeIntensity(prevIntensity);
+				scp207.Intensity = prevIntensity;
 				scp207.ServerChangeDuration(float.MaxValue, false);
 			});
 

@@ -18,7 +18,7 @@ namespace Subclass.Handlers
 				Log.Debug($"Player with name {ev.Thrower.Nickname} has no subclass", Subclass.Instance.Config.Debug);
 				return;
 			}
-			if (TrackingAndMethods.PlayersWithSubclasses[ev.Thrower].Abilities.Contains(AbilityType.HealGrenadeFlash) && !ev.IsFrag)
+			if (TrackingAndMethods.PlayersWithSubclasses[ev.Thrower].Abilities.Contains(AbilityType.HealGrenadeFlash) && ev.GrenadeType == Exiled.API.Enums.GrenadeType.Flashbang)
 			{
 				if (!TrackingAndMethods.CanUseAbility(ev.Thrower, AbilityType.HealGrenadeFlash, TrackingAndMethods.PlayersWithSubclasses[ev.Thrower]))
 				{
@@ -29,7 +29,7 @@ namespace Subclass.Handlers
 				ev.IsAllowed = false;
 				UpdateHealths(ev, "HealGrenadeFlashHealAmount");
 			}
-			else if (TrackingAndMethods.PlayersWithSubclasses[ev.Thrower].Abilities.Contains(AbilityType.HealGrenadeFrag) && ev.IsFrag)
+			else if (TrackingAndMethods.PlayersWithSubclasses[ev.Thrower].Abilities.Contains(AbilityType.HealGrenadeFrag) && ev.GrenadeType == Exiled.API.Enums.GrenadeType.FragGrenade)
 			{
 				if (!TrackingAndMethods.CanUseAbility(ev.Thrower, AbilityType.HealGrenadeFrag, TrackingAndMethods.PlayersWithSubclasses[ev.Thrower]))
 				{

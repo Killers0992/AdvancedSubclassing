@@ -1,5 +1,6 @@
 ﻿using CommandSystem;
 using Exiled.API.Features;
+using PlayerStatsSystem;
 using RemoteAdmin;
 using System;
 using System.Collections.Generic;
@@ -70,7 +71,7 @@ namespace Subclass.AbilityCommands
 				if (target == null || target.Id == player.Id) return true;
 				TrackingAndMethods.AddCooldown(player, AbilityType.Punch);
 				TrackingAndMethods.UseAbility(player, AbilityType.Punch, subClass);
-				target.Hurt(subClass.FloatOptions["PunchDamage"], null, player.Nickname, player.Id);
+				target.Hurt(new UniversalDamageHandler(subClass.FloatOptions["PunchDamage"], new DeathTranslation(0, 0, 0, "")));
 			}
 
 			return true;

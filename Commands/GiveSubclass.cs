@@ -47,7 +47,7 @@ namespace Subclass.Commands
 						else
 						{
 							SubClass sc = Subclass.Instance.Classes[string.Join(" ", arguments.Array.Segment(arguments.Offset + 1))];
-							if (!sc.AffectsRoles.Contains(player1.Role)) player1.SetRole(sc.AffectsRoles[rnd.Next(sc.AffectsRoles.Count)], true);
+							if (!sc.AffectsRoles.Contains(player1.Role)) player1.SetRole(sc.AffectsRoles[rnd.Next(sc.AffectsRoles.Count)], Exiled.API.Enums.SpawnReason.ForceClass, true);
 							TrackingAndMethods.RemoveAndAddRoles(player1, true);
 							TrackingAndMethods.AddClass(player1, sc);
 							response = "Success.";
@@ -59,7 +59,7 @@ namespace Subclass.Commands
 						if (Subclass.Instance.Classes.ContainsKey(string.Join(" ", arguments.Array.Segment(arguments.Offset))))
 						{
 							SubClass sc = Subclass.Instance.Classes[string.Join(" ", arguments.Array.Segment(arguments.Offset))];
-							if (!sc.AffectsRoles.Contains(p.Role)) p.SetRole(sc.AffectsRoles[rnd.Next(sc.AffectsRoles.Count)], true);
+							if (!sc.AffectsRoles.Contains(p.Role)) p.SetRole(sc.AffectsRoles[rnd.Next(sc.AffectsRoles.Count)], Exiled.API.Enums.SpawnReason.ForceClass, true);
 							TrackingAndMethods.RemoveAndAddRoles(p, true);
 							TrackingAndMethods.AddClass(p, sc);
 							response = "Success.";
@@ -81,7 +81,7 @@ namespace Subclass.Commands
 						else
 						{
 							SubClass sc = Subclass.Instance.Classes[string.Join(" ", arguments.Array.Segment(arguments.Offset))];
-							if (!sc.AffectsRoles.Contains(p.Role)) p.SetRole(sc.AffectsRoles[rnd.Next(sc.AffectsRoles.Count)], true);
+							if (!sc.AffectsRoles.Contains(p.Role)) p.SetRole(sc.AffectsRoles[rnd.Next(sc.AffectsRoles.Count)], Exiled.API.Enums.SpawnReason.ForceClass, true);
 							TrackingAndMethods.RemoveAndAddRoles(p, true);
 							TrackingAndMethods.AddClass(p, sc);
 							response = "Success.";
@@ -101,7 +101,7 @@ namespace Subclass.Commands
 							foreach (Player p1 in Player.List)
 							{
 								if (p1.Role == RoleType.Spectator) continue;
-								if (!sc.AffectsRoles.Contains(p1.Role)) p1.SetRole(sc.AffectsRoles[rnd.Next(sc.AffectsRoles.Count)], true);
+								if (!sc.AffectsRoles.Contains(p1.Role)) p1.SetRole(sc.AffectsRoles[rnd.Next(sc.AffectsRoles.Count)], Exiled.API.Enums.SpawnReason.ForceClass, true);
 								TrackingAndMethods.RemoveAndAddRoles(p1, true);
 								TrackingAndMethods.AddClass(p1, sc);
 							}

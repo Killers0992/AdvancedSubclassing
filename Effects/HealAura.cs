@@ -38,13 +38,13 @@ namespace Subclass.Effects
 			AffectEnemies = affectEnemies;
 		}
 
-		public override void PublicUpdate()
+		public override void OnUpdate()
 		{
 			if (!NetworkServer.active)
 			{
 				return;
 			}
-			if (Enabled)
+			if (IsEnabled)
 			{
 				TimeLeft -= Time.deltaTime;
 				if (TimeLeft <= 0f)

@@ -28,9 +28,9 @@ namespace Subclass.MonoBehaviours
 			HealthPerTick = healthPerTick;
 		}
 
-		public override void PublicUpdate()
+		public override void OnUpdate()
 		{
-			if (!Enabled || Time.time < ActiveAt)
+			if (!IsEnabled || Time.time < ActiveAt)
 			{
 				TimeLeft = TimeBetweenTicks;
 				return;
@@ -40,7 +40,7 @@ namespace Subclass.MonoBehaviours
 			{
 				return;
 			}
-			if (Enabled)
+			if (IsEnabled)
 			{
 				TimeLeft -= Time.deltaTime;
 				if (TimeLeft <= 0f)

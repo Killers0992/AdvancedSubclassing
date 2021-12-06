@@ -24,11 +24,11 @@ namespace Subclass.AbilityCommands
 		public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
 		{
 			Player player = Player.Get(((PlayerCommandSender)sender).SenderId);
-			Scp268 scp268 = player.ReferenceHub.playerEffectsController.GetEffect<Scp268>();
-			if (TrackingAndMethods.PlayersVenting.Contains(player) && scp268 != null && scp268.Enabled)
+			Invisible scp268 = player.ReferenceHub.playerEffectsController.GetEffect<Invisible>();
+			if (TrackingAndMethods.PlayersVenting.Contains(player) && scp268 != null && scp268.IsEnabled)
 			{
 				TrackingAndMethods.PlayersVenting.Remove(player);
-				scp268.ServerDisable();
+				scp268.Disabled();
 				response = "";
 				return true;
 			}
@@ -57,7 +57,7 @@ namespace Subclass.AbilityCommands
 
 			if (scp268 != null)
 			{
-				if (scp268.Enabled)
+				if (scp268.IsEnabled)
 				{
 					Log.Debug($"Player {player.Nickname} failed to vent", Subclass.Instance.Config.Debug);
 					player.Broadcast(3, Subclass.Instance.Config.AlreadyInvisibleMessage);
@@ -70,7 +70,7 @@ namespace Subclass.AbilityCommands
 
 				//player.ReferenceHub.playerEffectsController.EnableEffect(scp268);
 
-				player.ReferenceHub.playerEffectsController.EnableEffect<Scp268>();
+				player.ReferenceHub.playerEffectsController.EnableEffect<Invisible>();
 				TrackingAndMethods.PlayersInvisibleByCommand.Add(player);
 				TrackingAndMethods.PlayersVenting.Add(player);
 				Timing.CallDelayed(subClass.FloatOptions.ContainsKey("VentDuration") ?
@@ -78,7 +78,7 @@ namespace Subclass.AbilityCommands
 					{
 						if (TrackingAndMethods.PlayersVenting.Contains(player)) TrackingAndMethods.PlayersVenting.Remove(player);
 						if (TrackingAndMethods.PlayersInvisibleByCommand.Contains(player)) TrackingAndMethods.PlayersInvisibleByCommand.Remove(player);
-						if (scp268.Enabled) player.ReferenceHub.playerEffectsController.DisableEffect<Scp268>();
+						if (scp268.IsEnabled) player.ReferenceHub.playerEffectsController.DisableEffect<Invisible>();
 					});
 
 				TrackingAndMethods.AddCooldown(player, AbilityType.Vent);

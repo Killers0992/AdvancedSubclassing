@@ -9,7 +9,6 @@ using UnityEngine;
 using EPlayer = Exiled.API.Features.Player;
 using EMap = Exiled.API.Features.Map;
 using System.Collections.Generic;
-using Grenades;
 using Mirror;
 using System;
 using Exiled.Loader;
@@ -18,6 +17,8 @@ using Subclass.Effects;
 using Subclass.MonoBehaviours;
 using Interactables.Interobjects;
 using Interactables.Interobjects.DoorUtils;
+using Exiled.API.Enums;
+using Exiled.API.Features.Items;
 
 namespace Subclass.Handlers
 {
@@ -53,7 +54,7 @@ namespace Subclass.Handlers
 					}
 					foreach (string message in TrackingAndMethods.QueuedCassieMessages)
 					{
-						Cassie.Message(message, true, false);
+                        Exiled.API.Features.Cassie.Message(message, true, false);
 						Log.Debug($"Sending message via cassie: {message}", Subclass.Instance.Config.Debug);
 					}
 					Timing.RunCoroutine(TrackingAndMethods.CheckRoundEnd());
@@ -69,7 +70,7 @@ namespace Subclass.Handlers
 		{
 			Timing.CallDelayed(Subclass.Instance.CommonUtilsEnabled ? 2f : 0.1f, () =>
 			{
-				if (!ev.IsEscaped) TrackingAndMethods.RemoveAndAddRoles(ev.Player);
+				if (ev.Reason != SpawnReason.Escaped) TrackingAndMethods.RemoveAndAddRoles(ev.Player);
 			});
 			object afkComp = ev.Player.GameObject.GetComponent("AFKComponent");
 			if (afkComp != null)
@@ -105,7 +106,8 @@ namespace Subclass.Handlers
 				return;
 			}
 
-			if (ev.Door is PryableDoor pryableDoor && (ev.Door.RequiredPermissions.RequiredPermissions != KeycardPermissions.None || ev.Door.ActiveLocks != 0) && !ev.Door.IsConsideredOpen() && ev.Player.CurrentItemIndex == -1)
+
+			if (ev.Door.Base is PryableDoor pryableDoor && (ev.Door.RequiredPermissions.RequiredPermissions != Interactables.Interobjects.DoorUtils.KeycardPermissions.None || ev.Door.DoorLockType != DoorLockType.None) && !ev.Door.Base.IsConsideredOpen() && ev.Player.CurrentItem == null)
 			{
 				if (TrackingAndMethods.PlayersWithSubclasses.ContainsKey(ev.Player))
 				{
@@ -131,7 +133,7 @@ namespace Subclass.Handlers
 					}
 				}
 			}
-			else if (!ev.IsAllowed && !(ev.Door is BreakableDoor breakableDoor && breakableDoor.IsDestroyed) && ev.Door.ActiveLocks == 0 && TrackingAndMethods.PlayersWithSubclasses.ContainsKey(ev.Player) &&
+			else if (!ev.IsAllowed && !(ev.Door.Base is BreakableDoor breakableDoor && breakableDoor.IsDestroyed) && ev.Door.DoorLockType == DoorLockType.None && TrackingAndMethods.PlayersWithSubclasses.ContainsKey(ev.Player) &&
 					  TrackingAndMethods.PlayersWithSubclasses[ev.Player].Abilities.Contains(AbilityType.BypassKeycardReaders))
 			{
 				SubClass subClass = TrackingAndMethods.PlayersWithSubclasses[ev.Player];
@@ -223,14 +225,13 @@ namespace Subclass.Handlers
 		{
 			if (TrackingAndMethods.PlayersWithSubclasses.ContainsKey(ev.Target) && TrackingAndMethods.PlayersWithSubclasses[ev.Target].Abilities.Contains(AbilityType.ExplodeOnDeath))
 			{
-				GrenadeManager grenadeManager = ev.Target.ReferenceHub.gameObject.GetComponent<GrenadeManager>();
-				GrenadeSettings settings = grenadeManager.availableGrenades.FirstOrDefault(g => g.inventoryID == ItemType.GrenadeFrag);
-				Grenade grenade = UnityEngine.Object.Instantiate(settings.grenadeInstance).GetComponent<Grenade>();
-				grenade.fuseDuration = TrackingAndMethods.PlayersWithSubclasses[ev.Target].FloatOptions.ContainsKey("ExplodeOnDeathFuseTimer") ?
-					TrackingAndMethods.PlayersWithSubclasses[ev.Target].FloatOptions["ExplodeOnDeathFuseTimer"] : 2f;
-				grenade.FullInitData(grenadeManager, ev.Target.Position, Quaternion.Euler(grenade.throwStartAngle),
-					grenade.throwLinearVelocityOffset, grenade.throwAngularVelocity, ev.Target.Team);
-				NetworkServer.Spawn(grenade.gameObject);
+				Throwable throwable = null;
+				var gren = new ExplosiveGrenade(ItemType.GrenadeHE);
+				if (TrackingAndMethods.PlayersWithSubclasses[ev.Target].FloatOptions.ContainsKey("ExplodeOnDeathFuseTimer"))
+					gren.FuseTime = TrackingAndMethods.PlayersWithSubclasses[ev.Target].FloatOptions["ExplodeOnDeathFuseTimer"];
+				throwable = gren;
+
+				ev.Target.ThrowItem(throwable, false);
 			}
 
 			SubClass subClass = TrackingAndMethods.PlayersWithSubclasses.ContainsKey(ev.Target) ? TrackingAndMethods.PlayersWithSubclasses[ev.Target] : null;
@@ -262,7 +263,7 @@ namespace Subclass.Handlers
 					Timing.CallDelayed(killerSubclass.FloatOptions.ContainsKey("InfectDelay") ? killerSubclass.FloatOptions["InfectDelay"] : 10, () =>
 					{
 						if (ev.Target.IsAlive) return;
-						ev.Target.SetRole(RoleType.Scp0492, true);
+						ev.Target.SetRole(RoleType.Scp0492, SpawnReason.ForceClass, true);
 						ev.Target.ReferenceHub.playerMovementSync.OverridePosition(pos, 0f);
 					});
 				}
@@ -280,7 +281,7 @@ namespace Subclass.Handlers
 			{
 				foreach (Ragdoll doll in UnityEngine.Object.FindObjectsOfType<Ragdoll>())
 				{
-					if (doll.owner.PlayerId == ev.PlayerId)
+					if (doll.NetworkInfo.OwnerHub.playerId == ev.Owner.Id)
 					{
 						if (TrackingAndMethods.GetPreviousRole(ev.Owner) != null && !TrackingAndMethods.RagdollRoles.ContainsKey(doll.netId))
 						{
@@ -314,8 +315,8 @@ namespace Subclass.Handlers
 			{
 				if (TrackingAndMethods.PlayersWithSubclasses.ContainsKey(ev.Player))
 				{
-					if (!cuffed && TrackingAndMethods.PlayersWithSubclasses[ev.Player].EscapesAs[0] != RoleType.None) ev.Player.SetRole(TrackingAndMethods.PlayersWithSubclasses[ev.Player].EscapesAs[0], false, true);
-					else if (cuffed && TrackingAndMethods.PlayersWithSubclasses[ev.Player].EscapesAs[1] != RoleType.None) ev.Player.SetRole(TrackingAndMethods.PlayersWithSubclasses[ev.Player].EscapesAs[1], false, true);
+					if (!cuffed && TrackingAndMethods.PlayersWithSubclasses[ev.Player].EscapesAs[0] != RoleType.None) ev.Player.SetRole(TrackingAndMethods.PlayersWithSubclasses[ev.Player].EscapesAs[0], SpawnReason.ForceClass, true);
+					else if (cuffed && TrackingAndMethods.PlayersWithSubclasses[ev.Player].EscapesAs[1] != RoleType.None) ev.Player.SetRole(TrackingAndMethods.PlayersWithSubclasses[ev.Player].EscapesAs[1], SpawnReason.ForceClass, true);
 				}
 				TrackingAndMethods.RemoveAndAddRoles(ev.Player, false, false, true);
 			});
@@ -325,7 +326,7 @@ namespace Subclass.Handlers
 
 		public void OnHurting(HurtingEventArgs ev)
 		{
-			if (ev.DamageType == DamageTypes.Scp207 && TrackingAndMethods.PlayersBloodLusting.Contains(ev.Target))
+			if (ev.Handler.Type == DamageType.Scp207 && TrackingAndMethods.PlayersBloodLusting.Contains(ev.Target))
 			{
 				ev.IsAllowed = false;
 				return;
@@ -352,9 +353,9 @@ namespace Subclass.Handlers
 				return;
 			}
 
-			if (ev.Attacker.Id != ev.Target.Id) ev.Attacker.ReferenceHub.playerEffectsController.DisableEffect<Scp268>();
+			if (ev.Attacker.Id != ev.Target.Id) ev.Attacker.ReferenceHub.playerEffectsController.DisableEffect<Invisible>();
 
-			if (ev.Attacker.Id != ev.Target.Id && ev.DamageType != DamageTypes.Falldown && attackerClass != null &&
+			if (ev.Attacker.Id != ev.Target.Id && ev.Handler.Type != DamageType.Falldown && attackerClass != null &&
 				(attackerClass.OnHitEffects.Count > 0))
 			{
 				foreach (string effect in attackerClass.OnHitEffects)
@@ -372,9 +373,9 @@ namespace Subclass.Handlers
 				}
 			}
 
-			if (targetClass != null && (targetClass.OnDamagedEffects.ContainsKey(ev.DamageType.name.ToUpper().Replace("-", "").Replace(" ", ""))))
+			if (targetClass != null && (targetClass.OnDamagedEffects.ContainsKey(ev.Handler.Type.ToString().ToUpper())))
 			{
-				foreach (string effect in targetClass.OnDamagedEffects[ev.DamageType.name.ToUpper().Replace("-", "").Replace(" ", "")])
+				foreach (string effect in targetClass.OnDamagedEffects[ev.Handler.Type.ToString().ToUpper()])
 				{
 					Log.Debug($"Checking on hit damage: {effect} for {ev.Target.Nickname}", Subclass.Instance.Config.Debug);
 					if ((rnd.NextDouble() * 100) < targetClass.FloatOptions[("OnDamaged" + effect + "Chance")])
@@ -391,13 +392,13 @@ namespace Subclass.Handlers
 
 			if (targetClass != null)
 			{
-				if (targetClass.Abilities.Contains(AbilityType.NoSCP207Damage) && ev.DamageType == DamageTypes.Scp207)
+				if (targetClass.Abilities.Contains(AbilityType.NoSCP207Damage) && ev.Handler.Type == DamageType.Scp207)
 					ev.IsAllowed = false;
 
-				if (targetClass.Abilities.Contains(AbilityType.NoHumanDamage) && ev.DamageType.isWeapon)
+				if (targetClass.Abilities.Contains(AbilityType.NoHumanDamage) && ev.Handler.Type == DamageType.Firearm)
 					ev.IsAllowed = false;
 
-				if (targetClass.Abilities.Contains(AbilityType.NoSCPDamage) && ev.DamageType.isScp)
+				if (targetClass.Abilities.Contains(AbilityType.NoSCPDamage) && ev.Handler.Type == DamageType.Scp)
 					ev.IsAllowed = false;
 
 				if (targetClass.Abilities.Contains(AbilityType.Nimble) &&
@@ -409,7 +410,7 @@ namespace Subclass.Handlers
 				if (TrackingAndMethods.PlayersWithZombies.ContainsKey(ev.Target) && TrackingAndMethods.PlayersWithZombies[ev.Target].Contains(ev.Attacker))
 					ev.IsAllowed = false;
 
-				if (ev.DamageType == DamageTypes.Grenade && targetClass.Abilities.Contains(AbilityType.GrenadeImmune))
+				if (ev.Handler.Type == DamageType.Explosion && targetClass.Abilities.Contains(AbilityType.GrenadeImmune))
 				{
 					Concussed concussedEffect = ev.Target.ReferenceHub.playerEffectsController.GetEffect<Concussed>();
 					concussedEffect.Intensity = 3;
@@ -429,7 +430,7 @@ namespace Subclass.Handlers
 				}
 			}
 
-			if (ev.DamageType == DamageTypes.Falldown) return;
+			if (ev.Handler.Type == DamageType.Falldown) return;
 			if (attackerClass != null && attackerClass.Abilities.Contains(AbilityType.LifeSteal))
 			{
 				ev.Attacker.Health += Mathf.Clamp(ev.Amount * ((attackerClass.FloatOptions.ContainsKey("LifeStealPercent") ?
@@ -448,7 +449,7 @@ namespace Subclass.Handlers
 		{
 			if (TrackingAndMethods.PlayersInvisibleByCommand.Contains(ev.Shooter)) TrackingAndMethods.PlayersInvisibleByCommand.Remove(ev.Shooter);
 			if (TrackingAndMethods.PlayersVenting.Contains(ev.Shooter)) TrackingAndMethods.PlayersVenting.Remove(ev.Shooter);
-			EPlayer target = EPlayer.Get(ev.Target);
+			EPlayer target = EPlayer.Get(ev.TargetNetId);
 			if (target != null)
 			{
 				if (TrackingAndMethods.PlayerHasFFToPlayer(ev.Shooter, target))
@@ -518,7 +519,7 @@ namespace Subclass.Handlers
 					|| (TrackingAndMethods.Zombie106Kills[scp106] % TrackingAndMethods.PlayersWithSubclasses[scp106].IntOptions["Zombie106NeededKills"]) == 0))
 				{
 					ev.IsAllowed = false;
-					ev.Player.SetRole(RoleType.Scp0492, true);
+					ev.Player.SetRole(RoleType.Scp0492, SpawnReason.ForceClass, true);
 					if (TrackingAndMethods.PlayersWithSubclasses[scp106].IntOptions.ContainsKey("Zombie106Health"))
 					{
 						ev.Player.Health = TrackingAndMethods.PlayersWithSubclasses[scp106].IntOptions["Zombie106Health"];
@@ -536,9 +537,9 @@ namespace Subclass.Handlers
 			if (TrackingAndMethods.PlayersInvisibleByCommand.Contains(ev.Player)) TrackingAndMethods.PlayersInvisibleByCommand.Remove(ev.Player);
 		}
 
-		public void OnUsingMedicalItem(UsingMedicalItemEventArgs ev)
+		public void OnUsingItem(UsingItemEventArgs ev)
 		{
-			if (ev.Item == ItemType.SCP268) return;
+			if (ev.Item.Type == ItemType.SCP268) return;
 			if (TrackingAndMethods.PlayersWithSubclasses.ContainsKey(ev.Player) && TrackingAndMethods.PlayersWithSubclasses[ev.Player].Abilities.Contains(AbilityType.CantHeal))
 			{
 				ev.IsAllowed = false;

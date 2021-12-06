@@ -72,10 +72,20 @@ namespace Subclass.AbilityCommands
 			int lieutenants = 0;
 			int cadets = 0;
 
+			int marauder = 1;
+			int represor = 0;
+			int riflemans = 0;
+
 			if (isMTF)
 			{
 				lieutenants = Mathf.Clamp(spawns - commanders, 0, 3);
 				cadets = spawns - lieutenants - commanders;
+			}
+
+			if (!isMTF)
+			{
+				represor = Mathf.Clamp(spawns - marauder, 0, 3);
+				riflemans = spawns - represor - marauder;
 			}
 
 			for (int i = 0; i < spawns; i++)
@@ -85,21 +95,31 @@ namespace Subclass.AbilityCommands
 				spectators.RemoveAt(index);
 				if (!isMTF)
 				{
-					p.SetRole(RoleType.ChaosInsurgency);
+					if (riflemans > 0)
+					{
+						p.SetRole(RoleType.ChaosRifleman);
+						riflemans--;
+					}
+					else if (represor > 0)
+					{
+						p.SetRole(RoleType.ChaosRepressor);
+						represor--;
+					}
+					else p.SetRole(RoleType.ChaosRifleman);
 				}
 				else
 				{
 					if (commanders > 0)
 					{
-						p.SetRole(RoleType.NtfCommander);
+						p.SetRole(RoleType.NtfPrivate);
 						commanders--;
 					}
 					else if (lieutenants > 0)
 					{
-						p.SetRole(RoleType.NtfLieutenant);
+						p.SetRole(RoleType.NtfSergeant);
 						lieutenants--;
 					}
-					else p.SetRole(RoleType.NtfCadet);
+					else p.SetRole(RoleType.NtfPrivate);
 				}
 
 			}

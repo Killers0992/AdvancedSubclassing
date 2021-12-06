@@ -25,7 +25,19 @@ namespace Subclass
 		public Dictionary<RoleType, float> BaseWeights { get; set; } = new Dictionary<RoleType, float>
 		{
 			{
-				RoleType.ChaosInsurgency,
+				RoleType.ChaosRifleman,
+				0f
+			},
+			{
+				RoleType.ChaosRepressor,
+				0f
+			},
+			{
+				RoleType.ChaosMarauder,
+				0f
+			},
+			{
+				RoleType.ChaosConscript,
 				0f
 			},
 			{
@@ -37,19 +49,19 @@ namespace Subclass
 				0f
 			},
 			{
-				RoleType.NtfCadet,
+				RoleType.NtfPrivate,
 				0f
 			},
 			{
-				RoleType.NtfCommander,
+				RoleType.NtfCaptain,
 				0f
 			},
 			{
-				RoleType.NtfLieutenant,
+				RoleType.NtfSergeant,
 				0f
 			},
 			{
-				RoleType.NtfScientist,
+				RoleType.NtfSpecialist,
 				0f
 			},
 			{

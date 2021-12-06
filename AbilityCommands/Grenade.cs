@@ -40,7 +40,7 @@ namespace Subclass.AbilityCommands
 					return true;
 				}
 
-				Utils.SpawnGrenade(ItemType.GrenadeFrag, player, subClass);
+				Utils.SpawnGrenade(ItemType.GrenadeHE, player, subClass);
 				TrackingAndMethods.AddCooldown(player, AbilityType.GrenadeOnCommand);
 				TrackingAndMethods.UseAbility(player, AbilityType.GrenadeOnCommand, subClass);
 				Log.Debug($"Player {player.Nickname} successfully used grenade on commad", Subclass.Instance.Config.Debug);

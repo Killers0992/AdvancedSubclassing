@@ -56,7 +56,7 @@ namespace Subclass.AbilityCommands
 					if (target == null || target.Id == player.Id || player.Side == target.Side || (player.Team == Team.SCP && target.Team == Team.TUT)) return true;
 					TrackingAndMethods.UseAbility(player, AbilityType.Disarm, subClass);
 					TrackingAndMethods.AddCooldown(player, AbilityType.Disarm);
-					if (target.CurrentItemIndex != -1) target.DropItem(target.CurrentItem);
+					if (target.CurrentItem != null) target.DropItem(target.CurrentItem);
 				}
 			}
 			else
@@ -70,7 +70,7 @@ namespace Subclass.AbilityCommands
 					foreach (Player target in players)
 					{
 						if (target == null || target.Id == player.Id || player.Side == target.Side || (player.Team == Team.SCP && target.Team == Team.TUT)) continue;
-						if (target.CurrentItemIndex != -1) target.DropItem(target.CurrentItem);
+						if (target.CurrentItem != null) target.DropItem(target.CurrentItem);
 					}
 				}
 			}

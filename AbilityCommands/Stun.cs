@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using CustomPlayerEffects;
+using PlayerStatsSystem;
 
 namespace Subclass.AbilityCommands
 {
@@ -55,7 +56,7 @@ namespace Subclass.AbilityCommands
 				if (target == null || target.Id == player.Id || player.Side == target.Side || (player.Team == Team.SCP && target.Team == Team.TUT)) return true;
 				TrackingAndMethods.UseAbility(player, AbilityType.Stun, subClass);
 				TrackingAndMethods.AddCooldown(player, AbilityType.Stun);
-				target.Hurt(subClass.FloatOptions["StunDamage"], null, player.Nickname, player.Id);
+				target.Hurt(new UniversalDamageHandler(subClass.FloatOptions["StunDamage"], new DeathTranslation(0,0,0, "")));
 				target.EnableEffect<Ensnared>(subClass.FloatOptions.ContainsKey("StunDuration") ? subClass.FloatOptions["StunDuration"] : 3);
 				target.EnableEffect<Blinded>(subClass.FloatOptions.ContainsKey("StunDuration") ? subClass.FloatOptions["StunDuration"] : 3);
 			}

@@ -99,7 +99,7 @@ namespace Subclass
 			Player.Escaping += player.OnEscaping;
 			Player.FailingEscapePocketDimension += player.OnFailingEscapePocketDimension;
 			Player.Interacted += player.OnInteracted;
-			Player.UsingMedicalItem += player.OnUsingMedicalItem;
+			Player.UsingItem += player.OnUsingItem;
 			Player.EnteringPocketDimension += player.OnEnteringPocketDimension;
 			Player.SpawningRagdoll += player.OnSpawningRagdoll;
 
@@ -129,7 +129,7 @@ namespace Subclass
 			Player.Escaping -= player.OnEscaping;
 			Player.FailingEscapePocketDimension -= player.OnFailingEscapePocketDimension;
 			Player.Interacted -= player.OnInteracted;
-			Player.UsingMedicalItem -= player.OnUsingMedicalItem;
+			Player.UsingItem -= player.OnUsingItem;
 			Player.EnteringPocketDimension -= player.OnEnteringPocketDimension;
 			Player.SpawningRagdoll -= player.OnSpawningRagdoll;
 			player = null;
@@ -272,7 +272,7 @@ namespace Subclass
 
 		public Dictionary<int, Dictionary<string, float>> SpawnItems = new Dictionary<int, Dictionary<string, float>>();
 
-		public Dictionary<AmmoType, int> SpawnAmmo = new Dictionary<AmmoType, int>();
+		public Dictionary<ItemType, ushort> SpawnAmmo = new Dictionary<ItemType, ushort>();
 
 		public List<AbilityType> Abilities = new List<AbilityType>();
 
@@ -304,7 +304,7 @@ namespace Subclass
 
 		public SubClass(string name, List<RoleType> roles, Dictionary<string, string> strings, Dictionary<string, bool> bools,
 			Dictionary<string, int> ints, Dictionary<string, float> floats, List<string> spawns, Dictionary<int, Dictionary<string, float>> items,
-			Dictionary<AmmoType, int> ammo, List<AbilityType> abilities, Dictionary<AbilityType, float> cooldowns,
+			Dictionary<ItemType, ushort> ammo, List<AbilityType> abilities, Dictionary<AbilityType, float> cooldowns,
 			List<string> ffRules = null, List<string> onHitEffects = null, List<string> spawnEffects = null, List<RoleType> cantDamage = null,
 			string endsRoundWith = "RIP", RoleType spawnsAs = RoleType.None, RoleType[] escapesAs = null, Dictionary<string, List<string>> onTakeDamage = null, 
 			List<RoleType> cantDamageRoles = null, List<Team> cantDamageTeams = null, List<Team> teamsThatCantDamage = null, List<string> cantDamageSubclasses = null,
@@ -352,7 +352,7 @@ namespace Subclass
 			FloatOptions = new Dictionary<string, float>(subClass.FloatOptions);
 			SpawnLocations = new List<string>(subClass.SpawnLocations);
 			SpawnItems = new Dictionary<int, Dictionary<string, float>>(subClass.SpawnItems);
-			SpawnAmmo = new Dictionary<AmmoType, int>(subClass.SpawnAmmo);
+			SpawnAmmo = new Dictionary<ItemType, ushort>(subClass.SpawnAmmo);
 			Abilities = new List<AbilityType>(subClass.Abilities);
 			AbilityCooldowns = new Dictionary<AbilityType, float>(subClass.AbilityCooldowns);
 			AdvancedFFRules = new List<string>(subClass.AdvancedFFRules);
