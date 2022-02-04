@@ -214,6 +214,9 @@ namespace Subclass.Handlers
 
 		public void OnDying(DyingEventArgs ev)
 		{
+			if (ev.Target == null || ev.Killer == null)
+				return;
+
 			if (!TrackingAndMethods.AllowedToDamage(ev.Target, ev.Killer))
 			{
 				Log.Debug("Not allowed to kill", Subclass.Instance.Config.Debug);
@@ -243,33 +246,37 @@ namespace Subclass.Handlers
 			TrackingAndMethods.RemoveZombie(ev.Target);
 			TrackingAndMethods.RemoveAndAddRoles(ev.Target, true);
 
-			if (ev.Killer != ev.Target && ev.Killer.Role == RoleType.Scp0492 && (subClass == null || !subClass.Abilities.Contains(AbilityType.CantBeInfected)) &&
-				TrackingAndMethods.PlayersWithSubclasses.ContainsKey(ev.Killer) && TrackingAndMethods.PlayersWithSubclasses[ev.Killer].Abilities.Contains(AbilityType.Infect))
-			{
-				SubClass killerSubclass = TrackingAndMethods.PlayersWithSubclasses[ev.Killer];
-				if (TrackingAndMethods.OnCooldown(ev.Killer, AbilityType.Infect, killerSubclass))
+			if (ev.Killer != null)
+            {
+				if (ev.Killer != ev.Target && ev.Killer.Role == RoleType.Scp0492 && (subClass == null || !subClass.Abilities.Contains(AbilityType.CantBeInfected)) &&
+  TrackingAndMethods.PlayersWithSubclasses.ContainsKey(ev.Killer) && TrackingAndMethods.PlayersWithSubclasses[ev.Killer].Abilities.Contains(AbilityType.Infect))
 				{
-					Log.Debug($"Player {ev.Killer.Nickname} failed to infect (on cooldown)", Subclass.Instance.Config.Debug);
-					TrackingAndMethods.DisplayCooldown(ev.Killer, AbilityType.Infect, killerSubclass, "infect", Time.time);
-					return;
-				}
-				if (!TrackingAndMethods.CanUseAbility(ev.Killer, AbilityType.Infect, killerSubclass))
-				{
-					TrackingAndMethods.DisplayCantUseAbility(ev.Killer, AbilityType.Infect, killerSubclass, "infect");
-					return;
-				}
-				if ((rnd.NextDouble() * 100) < (killerSubclass.FloatOptions.ContainsKey("InfectChance") ? killerSubclass.FloatOptions["InfectChance"] : 25))
-				{
-					TrackingAndMethods.AddCooldown(ev.Killer, AbilityType.Infect);
-					TrackingAndMethods.UseAbility(ev.Killer, AbilityType.Infect, killerSubclass);
-					Vector3 pos = ev.Target.Position;
-					Timing.CallDelayed(killerSubclass.FloatOptions.ContainsKey("InfectDelay") ? killerSubclass.FloatOptions["InfectDelay"] : 10, () =>
+					SubClass killerSubclass = TrackingAndMethods.PlayersWithSubclasses[ev.Killer];
+					if (TrackingAndMethods.OnCooldown(ev.Killer, AbilityType.Infect, killerSubclass))
 					{
-						if (ev.Target.IsAlive) return;
-						ev.Target.SetRole(RoleType.Scp0492, SpawnReason.ForceClass, true);
-						ev.Target.ReferenceHub.playerMovementSync.OverridePosition(pos, 0f);
-					});
+						Log.Debug($"Player {ev.Killer.Nickname} failed to infect (on cooldown)", Subclass.Instance.Config.Debug);
+						TrackingAndMethods.DisplayCooldown(ev.Killer, AbilityType.Infect, killerSubclass, "infect", Time.time);
+						return;
+					}
+					if (!TrackingAndMethods.CanUseAbility(ev.Killer, AbilityType.Infect, killerSubclass))
+					{
+						TrackingAndMethods.DisplayCantUseAbility(ev.Killer, AbilityType.Infect, killerSubclass, "infect");
+						return;
+					}
+					if ((rnd.NextDouble() * 100) < (killerSubclass.FloatOptions.ContainsKey("InfectChance") ? killerSubclass.FloatOptions["InfectChance"] : 25))
+					{
+						TrackingAndMethods.AddCooldown(ev.Killer, AbilityType.Infect);
+						TrackingAndMethods.UseAbility(ev.Killer, AbilityType.Infect, killerSubclass);
+						Vector3 pos = ev.Target.Position;
+						Timing.CallDelayed(killerSubclass.FloatOptions.ContainsKey("InfectDelay") ? killerSubclass.FloatOptions["InfectDelay"] : 10, () =>
+						{
+							if (ev.Target.IsAlive) return;
+							ev.Target.SetRole(RoleType.Scp0492, SpawnReason.ForceClass, true);
+							ev.Target.ReferenceHub.playerMovementSync.OverridePosition(pos, 0f);
+						});
+					}
 				}
+
 			}
 
 			Timing.CallDelayed(0.1f, () =>

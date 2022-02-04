@@ -245,23 +245,23 @@ namespace Subclass.Managers
 							foreach (var item2 in (Dictionary<object, object>)spawnItemsTemp[item.Key])
 								spawnItems[int.Parse((string)item.Key)].Add((string)item2.Key, float.Parse((string)item2.Value));
 						}
+						Dictionary<ItemType, int> ammo = new Dictionary<ItemType, int>();
 
 						Log.Debug($"Attempting to load spawn ammo for class: {(string)obj["name"]}", Subclass.Instance.Config.Debug);
-						Dictionary<object, object> ammoTemp = (Dictionary<object, object>)obj["spawn_ammo"];
-						Dictionary<ItemType, int> ammo = new Dictionary<ItemType, int>();
-						foreach (var item in ammoTemp)
-						{
-							if (Enum.TryParse<ItemType>((string)item.Key, true, out ItemType itm))
+
+                        try
+                        {
+							Dictionary<object, object> ammoTemp = (Dictionary<object, object>)obj["spawn_ammo"];
+							foreach (var item in ammoTemp)
 							{
-								ammo.Add(itm, int.Parse((string)item.Value));
+								ammo.Add((ItemType)Enum.Parse(typeof(ItemType), (string)item.Key), int.Parse((string)item.Value));
 							}
-                            else
-                            {
-								Log.Error($"Failed parsing ammo name \"{(string)item.Key}\", possible names: Ammo12gauge, Ammo44cal, Ammo762x39, Ammo556x45, Ammo9x19.");
-                            }
 
 						}
-
+						catch (Exception)
+                        {
+							Log.Debug($"Failed loading ammo: {(string)obj["name"]}", Subclass.Instance.Config.Debug);
+						}
 
 						Log.Debug($"Attempting to load abilities for class: {(string)obj["name"]}", Subclass.Instance.Config.Debug);
 						List<string> abilitiesTemp = ((IEnumerable<object>)obj["abilities"]).Cast<string>().ToList();

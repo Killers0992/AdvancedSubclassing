@@ -296,6 +296,8 @@ namespace Subclass
 					copy.RolesThatCantDamage, "SCP", RoleType.None, null, subClass.OnDamagedEffects, null
 				);
 			}
+			Log.Debug("Setup-1", Subclass.Instance.Config.Debug || Subclass.Instance.Config.ClassDebug);
+
 			if (NextSpawnWave.Contains(player) && NextSpawnWaveGetsRole.ContainsKey(player.Role) && !SpawnWaveSpawns.Contains(subClass))
 			{
 				if (SubClassesSpawned.ContainsKey(subClass)) SubClassesSpawned[subClass]++;
@@ -308,6 +310,7 @@ namespace Subclass
 				else SubClassesSpawned.Add(subClass, 1);
 			}
 			if (!disguised) PlayersWithSubclasses.Add(player, subClass);
+			Log.Debug("Setup0", Subclass.Instance.Config.Debug || Subclass.Instance.Config.ClassDebug);
 
 			int spawnIndex = rnd.Next(subClass.SpawnLocations.Count);
 			List<Vector3> spawnLocations = new List<Vector3>();
@@ -335,6 +338,7 @@ namespace Subclass
 				DoorVariant door = DoorNametagExtension.NamedDoors["173_BOTTOM"].TargetDoor;
 				spawnLocations.Add(door.transform.position + new Vector3(1f, 0, 1f));
 			}
+			Log.Debug("Setup1", Subclass.Instance.Config.Debug || Subclass.Instance.Config.ClassDebug);
 
 			spawnLocations.AddRange(Map.Rooms.Where(r => subClass.SpawnLocations.Contains(r.Type.ToString())).Select(r => r.Transform.position));
 
@@ -351,9 +355,12 @@ namespace Subclass
 					break;
 				}
 			}
+			Log.Debug("Setup2", Subclass.Instance.Config.Debug || Subclass.Instance.Config.ClassDebug);
 
 			try
 			{
+				Log.Debug("Setup3", Subclass.Instance.Config.Debug || Subclass.Instance.Config.ClassDebug);
+
 				player.Broadcast(subClass.FloatOptions.ContainsKey("BroadcastTimer") ? (ushort)subClass.FloatOptions["BroadcastTimer"] : (ushort)Subclass.Instance.Config.GlobalBroadcastTime, subClass.StringOptions["GotClassMessage"]);
 				if (subClass.StringOptions.ContainsKey("CassieAnnouncement") &&
 					!QueuedCassieMessages.Contains(subClass.StringOptions["CassieAnnouncement"])) QueuedCassieMessages.Add(subClass.StringOptions["CassieAnnouncement"]);
@@ -363,6 +370,7 @@ namespace Subclass
 					player.SetRole(subClass.SpawnsAs, SpawnReason.ForceClass, true);
 				}
 
+				Log.Debug("Give class items", Subclass.Instance.Config.Debug || Subclass.Instance.Config.ClassDebug);
 				if ((!lite || escaped) && subClass.SpawnItems.Count != 0)
 				{
 					player.ClearInventory(true);
@@ -412,6 +420,7 @@ namespace Subclass
 						}
 					}
 				}
+				Log.Debug("Give class items... done", Subclass.Instance.Config.Debug || Subclass.Instance.Config.ClassDebug);
 
 				if (subClass.IntOptions["MaxHealth"] != -1) player.MaxHealth = subClass.IntOptions["MaxHealth"];
 				if ((!lite || escaped) && subClass.IntOptions["HealthOnSpawn"] != -1) player.Health = subClass.IntOptions["HealthOnSpawn"];
